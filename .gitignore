@@ -6,7 +6,6 @@
 *.dll
 *.so
 *.dylib
-Makefile
 
 # Test binary, built with `go test -c`
 *.test
@@ -15,6 +14,7 @@ Makefile
 *.out
 
 # Dependency directories (remove the comment below to include it)
+go.sum
 vendor/
 **/manifests
 
