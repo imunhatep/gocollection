@@ -7,5 +7,5 @@ ENV GOARCH=amd64
 ADD . /project/
 WORKDIR /project/
 
-RUN go test -v -coverprofile=coverage.out ./gocollection/... \
+RUN go test -v -coverprofile=coverage.out ./... \
     && go tool cover -func=coverage.out

@@ -14,6 +14,10 @@ This library make suse of go generics, a.k.a type parameters with `Option` patte
 ## Dict
 List of functions for go `map`
 ```go
+package main
+
+import "github.com/imunhatep/gocollection/dict"
+
 func Keys[K comparable, V any](data map[K]V) []K {}
 func Values[K comparable, V any](data map[K]V) []V {}
 func Copy[K comparable, V any](data map[K]V) map[K]V {}
@@ -66,16 +70,55 @@ func UniqueAny[V any](data []V) []V {}
 ## Examples
 More examples could be found in go tests
 
+Dict
 ```go
-func NewStrTestMap(size int) HashMap[string, string] {
-    values := map[string]string{}
-    for _, i := range helper.Range(1, size) {
-        values[fmt.Sprintf("key_%d", i)] = fmt.Sprintf("value_%d", i)
-    }
+package main
 
-    return ToMap(values)
+import "github.com/imunhatep/gocollection/dict"
+
+func NewIntTestMap(size int) map[string]int {
+	values := map[string]int{}
+	for _, i := range helper.Range(1, size) {
+		values[fmt.Sprintf("key_%d", i)] = i
+	}
+
+	return values
 }
 
-l1 := NewStrTestMap(5)
-l2 := l1.Remove(l1.Keys().Head().MustGet())
+func main() {
+	double := func(i string, p int) int { return p * 2 }
+	// map
+	l1 := NewIntTestMap(5)
+	r1 := dict.Map(l1, double)
+}
+```
+
+Slice
+```go
+package main
+
+import "github.com/imunhatep/gocollection/slice"
+
+func main() {
+	stringify := func(p int) string { return string(rune(p * 2)) }
+
+	// map
+	l1 := []int{1, 2, 3, 4, 5, 6, 7, 8, 9}
+	r1 := slice.Map(l1, stringify)
+}
+```
+
+Sequence struct:
+```go
+package main
+
+import "github.com/imunhatep/gocollection/immutable"
+
+func main() {
+	double := func(p int) string { return string(rune(p * 2)) }
+
+	// map
+	l1 := immutable.NewSequence([]int{1, 2, 3, 4, 5, 6, 7, 8, 9}...)
+	r1 := l1.Map(double).Head().OrElse(0)
+}
 ```
