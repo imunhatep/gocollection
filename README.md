@@ -2,16 +2,26 @@ Simple GoLang collections implementation library
 ================
 This library make suse of go generics, a.k.a type parameters with `Option` pattern. 
 
-## Implemented structures
+### Functions
  - functions/dict
  - functions/slice
+
+### Structs
  - immutable/hashmap
  - immutable/sortedmap
  - immutable/sequence
  - mutable/hashmap
  - mutable/sequence
 
-## Dict
+## Requirements
+ - go 1.19.0
+
+## Install
+```bash
+go get -u github.com/imunhatep/gocollection
+```
+
+## Dict functions
 List of functions for go `map`
 ```go
 package main
@@ -37,7 +47,7 @@ func Map[K comparable, V any, Z any](data map[K]V, f func(K, V) Z) map[K]Z {}
 func ToSlice[K comparable, V any](data map[K]V) []tuple.T2[K, V] {} 
 ```
 
-## Slice
+## Slice functions
 List of functions for go `slice`
 ```go
 func Get[V any](data []V, i int) mo.Option[V] {} 
@@ -86,10 +96,19 @@ func NewIntTestMap(size int) map[string]int {
 }
 
 func main() {
-	double := func(i string, p int) int { return p * 2 }
-	// map
 	l1 := NewIntTestMap(5)
-	r1 := dict.Map(l1, double)
+	
+	l2 := dict.Fold(
+		l1,
+		map[string]int{},
+		func(z map[string]int, k string, v int) map[string]int {
+			z[k] = v
+			return z
+		},
+	)
+
+	double := func(p int) int { return p * 2 }
+	l2.Map(double).Head().OrElse(0)
 }
 ```
 
@@ -100,11 +119,11 @@ package main
 import "github.com/imunhatep/gocollection/slice"
 
 func main() {
-	stringify := func(p int) string { return string(rune(p * 2)) }
+	double := func(p int) int { return p * 2 }
 
 	// map
 	l1 := []int{1, 2, 3, 4, 5, 6, 7, 8, 9}
-	r1 := slice.Map(l1, stringify)
+	r1 := slice.Map(l1, double)
 }
 ```
 
@@ -115,7 +134,7 @@ package main
 import "github.com/imunhatep/gocollection/immutable"
 
 func main() {
-	double := func(p int) string { return string(rune(p * 2)) }
+	double := func(p int) int { return p * 2 }
 
 	// map
 	l1 := immutable.NewSequence([]int{1, 2, 3, 4, 5, 6, 7, 8, 9}...)
