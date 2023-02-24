@@ -182,7 +182,12 @@ func (o SortedMap[K, V]) IsEmpty() bool {
 }
 
 func (o SortedMap[K, V]) Keys() Sequence[K] {
-	return NewSequence(dict.Keys(o.index)...)
+	keys := []K{}
+	for _, p := range o.pairs {
+		keys = append(keys, p.V1)
+	}
+
+	return NewSequence(keys...)
 }
 
 func (o SortedMap[K, V]) Values() Sequence[V] {
