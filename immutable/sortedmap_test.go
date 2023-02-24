@@ -145,6 +145,11 @@ func TestSortedMapSortByKey(t *testing.T) {
 	assert.Equal(t, l1.ToSlice(), l1.Reversed().SortByKey(helper.StrSort).ToSlice(), "they should be equal")
 }
 
+func TestSortedMapKeys(t *testing.T) {
+	l1 := NewStrTestSortedMap(10)
+	assert.Equal(t, l1.Keys().ToSlice(), l1.Reversed().SortByKey(helper.StrSort).Keys().ToSlice(), "they should be equal")
+}
+
 func TestSortedMapRace(t *testing.T) {
 	update := func(lst SortedMap[int, int], s int) SortedMap[int, int] {
 		a := 30
