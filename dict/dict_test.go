@@ -13,7 +13,7 @@ type testStruct struct {
 	Some string
 }
 
-func NewStrTestMap(size int) map[string]string {
+func NewStrTestDict(size int) map[string]string {
 	values := map[string]string{}
 	for _, i := range helper.Range(1, size) {
 		values[fmt.Sprintf("key_%d", i)] = fmt.Sprintf("value_%d", i)
@@ -22,7 +22,7 @@ func NewStrTestMap(size int) map[string]string {
 	return values
 }
 
-func NewIntTestMap(size int) map[string]int {
+func NewIntTestDict(size int) map[string]int {
 	values := map[string]int{}
 	for _, i := range helper.Range(1, size) {
 		values[fmt.Sprintf("key_%d", i)] = i
@@ -31,10 +31,10 @@ func NewIntTestMap(size int) map[string]int {
 	return values
 }
 
-func TestMapMap(t *testing.T) {
+func TestDictMap(t *testing.T) {
 	double := func(i string, p int) int { return p * 2 }
 	// map
-	l1 := NewIntTestMap(5)
+	l1 := NewIntTestDict(5)
 	r1 := Map(l1, double)
 
 	for k, v := range l1 {
@@ -43,8 +43,8 @@ func TestMapMap(t *testing.T) {
 	}
 }
 
-func TestMapRemove(t *testing.T) {
-	l1 := NewStrTestMap(5)
+func TestDictRemove(t *testing.T) {
+	l1 := NewStrTestDict(5)
 	l2 := Remove(l1, slice.Head(Keys(l1)).OrEmpty())
 
 	assert.NotEqual(t, l1, l2, "these should not be equal")
@@ -57,15 +57,15 @@ func TestMapRemove(t *testing.T) {
 	assert.Empty(t, l2)
 }
 
-func TestMapUnique(t *testing.T) {
-	l1 := NewIntTestMap(5)
-	l2 := Merge(l1, NewIntTestMap(3))
+func TestDictUnique(t *testing.T) {
+	l1 := NewIntTestDict(5)
+	l2 := Merge(l1, NewIntTestDict(3))
 
 	assert.Equal(t, l1, l2, "unique map should stay unchanged")
 }
 
-func TestMapCompare(t *testing.T) {
-	l1 := NewStrTestMap(5)
+func TestDictCompare(t *testing.T) {
+	l1 := NewStrTestDict(5)
 	v1 := slice.Head(Values(l1)).MustGet()
 
 	assert.True(t, Contains(l1, v1), "seq must contain a value")
@@ -86,25 +86,25 @@ func TestMapCompare(t *testing.T) {
 	assert.True(t, Contains(s1, sv1))
 }
 
-func TestMapFilter(t *testing.T) {
-	l1 := NewIntTestMap(5)
+func TestDictFilter(t *testing.T) {
+	l1 := NewIntTestDict(5)
 	l2Size := Size(l1) - 4
 	l2 := Filter(l1, func(i string, v int) bool { return v < l2Size })
 
 	assert.Equal(t, l2Size, Size(l2), "these should be equal")
 }
 
-func TestMapFilterNot(t *testing.T) {
-	l1 := NewIntTestMap(5)
+func TestDictFilterNot(t *testing.T) {
+	l1 := NewIntTestDict(5)
 	l2Size := Size(l1) - 4
 	l2 := FilterNot(l1, func(i string, v int) bool { return v > l2Size })
 
 	assert.Equal(t, l2Size, Size(l2), "these should be equal")
 }
 
-func TestMapLimit(t *testing.T) {
+func TestDictLimit(t *testing.T) {
 	size := 3
-	l1 := NewIntTestMap(5)
+	l1 := NewIntTestDict(5)
 	l2 := Limit(l1, size)
 
 	assert.Equal(t, size, Size(l2), "limit items in slice")
@@ -113,8 +113,8 @@ func TestMapLimit(t *testing.T) {
 	assert.Equal(t, Size(l1), Size(l3), "set limit greater then size of the slice")
 }
 
-func TestMapFolding(t *testing.T) {
-	l1 := NewIntTestMap(5)
+func TestDictFolding(t *testing.T) {
+	l1 := NewIntTestDict(5)
 	l2 := Fold(
 		l1,
 		map[string]int{},
@@ -127,14 +127,14 @@ func TestMapFolding(t *testing.T) {
 	assert.Equal(t, l1, l2, "these should be equal")
 }
 
-func TestMapEmpty(t *testing.T) {
+func TestDictEmpty(t *testing.T) {
 	l1 := map[int]int{}
 
 	assert.True(t, IsEmpty(l1))
 	assert.Empty(t, Get(l1, 0).OrEmpty())
 }
 
-func TestMapRace(t *testing.T) {
+func TestDictRace(t *testing.T) {
 	update := func(lst map[int]int, s int) map[int]int {
 		a := 30
 		for i := s * a; i < (s+1)*a; i++ {

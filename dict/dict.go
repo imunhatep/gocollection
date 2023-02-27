@@ -141,7 +141,7 @@ func Limit[K comparable, V any](data map[K]V, l int) map[K]V {
 	for k, v := range data {
 		rez[k] = v
 
-		l = -1
+		l -= 1
 		if l <= 0 {
 			break
 		}
