@@ -11,58 +11,58 @@ type testStruct struct {
 	Some string
 }
 
-func NewStrTestSeq() []string {
+func NewStrTestSlice() []string {
 	return []string{"test1", "test2", "test3"}
 }
 
-func NewIntTestSeq() []int {
+func NewIntTestSlice() []int {
 	return []int{1, 2, 3, 4, 5, 6, 7, 8, 9}
 }
 
-func TestSeqHeadTail(t *testing.T) {
-	l1 := NewStrTestSeq()
+func TestSliceHeadTail(t *testing.T) {
+	l1 := NewStrTestSlice()
 
 	// Head / Tail
-	for _, v := range NewStrTestSeq() {
+	for _, v := range NewStrTestSlice() {
 		// assert equality
-		assert.Equal(t, Head(l1).MustGet(), v, "they should be equal")
+		assert.Equal(t, Head(l1).MustGet(), v, "these should be equal")
 		l1 = Tail(l1)
 	}
 }
 
-func TestSeqMap(t *testing.T) {
-	l1 := NewIntTestSeq()
+func TestSliceMap(t *testing.T) {
+	l1 := NewIntTestSlice()
 
 	stringify := func(p int) string { return string(rune(p * 2)) }
 
 	// map
 	r1 := Map(l1, stringify)
 	for i, v := range l1 {
-		assert.Equal(t, stringify(v), Get(r1, i).OrEmpty(), "they should be equal")
+		assert.Equal(t, stringify(v), Get(r1, i).OrEmpty(), "these should be equal")
 	}
 }
 
-func TestSeqUnique(t *testing.T) {
-	l1 := NewIntTestSeq()
-	l2 := Unique(append(l1, NewIntTestSeq()...))
+func TestSliceUnique(t *testing.T) {
+	l1 := NewIntTestSlice()
+	l2 := Unique(append(l1, NewIntTestSlice()...))
 
-	assert.Equal(t, l1, l2, "they should be equal")
+	assert.Equal(t, l1, l2, "these should be equal")
 }
 
-func TestSeqCompare(t *testing.T) {
-	l1 := NewStrTestSeq()
+func TestSliceCompare(t *testing.T) {
+	l1 := NewStrTestSlice()
 	v1 := Head(l1).OrEmpty()
 
 	assert.True(t, Contains(l1, v1), "seq must contain a value")
 
 	i1 := Find(l1, func(v string) bool { return v == v1 }).OrEmpty()
-	assert.Equal(t, v1, i1, "they should be equal")
+	assert.Equal(t, v1, i1, "these should be equal")
 
 	e1 := Find([]string{}, func(v string) bool { return v == "empty" })
 	assert.Empty(t, e1.OrEmpty())
 
 	i2 := FindWithIndex(l1, func(i int, v string) bool { return v == v1 }).OrEmpty()
-	assert.Equal(t, v1, i2.V2, "they should be equal")
+	assert.Equal(t, v1, i2.V2, "these should be equal")
 
 	e2 := FindWithIndex([]string{}, func(i int, v string) bool { return v == "empty" })
 	assert.Empty(t, e2.OrEmpty())
@@ -82,22 +82,42 @@ func TestSeqCompare(t *testing.T) {
 	assert.True(t, ok)
 }
 
-func TestSeqFilter(t *testing.T) {
-	l1 := NewIntTestSeq()
+func TestSliceFilter(t *testing.T) {
+	l1 := NewIntTestSlice()
 	l2Size := Size(l1) - 4
 	l2 := FilterWithIndex(l1, func(i int, v int) bool { return i < l2Size })
 
-	assert.Equal(t, l2Size, len(l2), "they should be equal")
+	assert.Equal(t, l2Size, len(l2), "these should be equal")
 }
 
-func TestSeqFolding(t *testing.T) {
-	l1 := NewIntTestSeq()
+func TestSliceFilterNot(t *testing.T) {
+	l1 := NewIntTestSlice()
+	l2Size := Size(l1) - 4
+	l2 := FilterNot(l1, func(v int) bool { return v > l2Size })
+
+	assert.Equal(t, l2Size, len(l2), "these should be equal")
+}
+
+func TestSliceLimit(t *testing.T) {
+	size := 4
+
+	l1 := NewIntTestSlice()
+
+	l2 := Limit(l1, size)
+	assert.Equal(t, size, Size(l2), "limit items in slice")
+
+	l3 := Limit(l1, 1000)
+	assert.Equal(t, Size(l1), Size(l3), "set limit greater then size of the slice")
+}
+
+func TestSliceFolding(t *testing.T) {
+	l1 := NewIntTestSlice()
 	l2 := FoldRight(l1, []int{}, func(s []int, i int, v int) []int { return append(s, v) })
 
-	assert.Equal(t, Reversed(l1), l2, "they should be equal")
+	assert.Equal(t, Reversed(l1), l2, "these should be equal")
 }
 
-func TestSeqEmpty(t *testing.T) {
+func TestSliceEmpty(t *testing.T) {
 	l1 := []int{}
 
 	assert.True(t, IsEmpty(l1))
@@ -109,8 +129,8 @@ func TestSeqEmpty(t *testing.T) {
 	assert.False(t, ok)
 }
 
-func TestSeqTail(t *testing.T) {
-	l1 := NewStrTestSeq()
+func TestSliceTail(t *testing.T) {
+	l1 := NewStrTestSlice()
 
 	// Tail
 	r1 := Tail(l1)
@@ -119,29 +139,29 @@ func TestSeqTail(t *testing.T) {
 	assert.NotEqual(t, l1[1:], r1, "should not be equal")
 }
 
-func TestSeqReversed(t *testing.T) {
-	l1 := NewStrTestSeq()
+func TestSliceReversed(t *testing.T) {
+	l1 := NewStrTestSlice()
 
 	// Reversed
 	r1 := Reversed(l1)
 	for i, v := range Reversed(r1) {
 		idx, _ := IndexOf(l1, v)
-		assert.Equal(t, i, idx, "they should be equal")
+		assert.Equal(t, i, idx, "these should be equal")
 	}
 }
 
-func TestSeqCopy(t *testing.T) {
-	l1 := NewStrTestSeq()
-	assert.Equal(t, l1, Copy(l1), "they should be equal")
+func TestSliceCopy(t *testing.T) {
+	l1 := NewStrTestSlice()
+	assert.Equal(t, l1, Copy(l1), "these should be equal")
 }
 
-func TestSeqSort(t *testing.T) {
-	l1 := NewStrTestSeq()
+func TestSliceSort(t *testing.T) {
+	l1 := NewStrTestSlice()
 	assert.NotEmpty(t, Reversed(l1), "should not be empty should be equal")
-	assert.Equal(t, l1, Sort(Reversed(l1), helper.StrSort), "they should be equal")
+	assert.Equal(t, l1, Sort(Reversed(l1), helper.StrSort), "these should be equal")
 }
 
-func TestSeqRace(t *testing.T) {
+func TestSliceRace(t *testing.T) {
 	update := func(lst []int, s int) []int {
 		a := 30
 		for i := s * a; i < (s+1)*a; i++ {
@@ -175,5 +195,5 @@ func TestSeqRace(t *testing.T) {
 	l2 = update(l2, 1)
 	l2 = update(l2, 2)
 
-	assert.Equal(t, l2, Sort(l1, helper.IntSort), "they should be equal")
+	assert.Equal(t, l2, Sort(l1, helper.IntSort), "these should be equal")
 }

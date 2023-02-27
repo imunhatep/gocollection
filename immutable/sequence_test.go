@@ -92,6 +92,26 @@ func TestSeqFilter(t *testing.T) {
 	assert.Equal(t, l2Size, l2.Size(), "they should be equal")
 }
 
+func TestSeqFilterNot(t *testing.T) {
+	l1 := NewIntTestSeq()
+	l2Size := l1.Size() - 4
+
+	l2 := l1.FilterNot(func(v int) bool { return v > l2Size })
+	assert.Equal(t, l2Size, l2.Size(), "they should be equal")
+}
+
+func TestSeqLimit(t *testing.T) {
+	size := 4
+
+	l1 := NewIntTestSeq()
+
+	l2 := l1.Limit(size)
+	assert.Equal(t, size, l2.Size(), "limit items in slice")
+
+	l3 := l1.Limit(10000)
+	assert.Equal(t, l1.Size(), l3.Size(), "set limit greater then size of the slice")
+}
+
 func TestSeqFolding(t *testing.T) {
 	l1 := NewIntTestSeq()
 	l2 := l1.FoldRight(NewSequence[int](), func(s Sequence[int], i int, v int) Sequence[int] { return s.Append(v) })

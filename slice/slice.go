@@ -122,6 +122,11 @@ func Filter[V any](data []V, p func(V) bool) []V {
 	return rez
 }
 
+func FilterNot[V any](data []V, f func(V) bool) []V {
+	fn := func(v V) bool { return !f(v) }
+	return Filter(data, fn)
+}
+
 func FilterWithIndex[V any](data []V, p func(int, V) bool) []V {
 	var rez []V
 	for i, v := range data {
@@ -148,6 +153,11 @@ func FoldRight[V any, Z any](data []V, z Z, m func(Z, int, V) Z) Z {
 // Size returns len() of items.
 func Size[V any](data []V) int {
 	return len(data)
+}
+
+// Limit returns first N elements.
+func Limit[V any](data []V, c int) []V {
+	return data[0:helper.Min(c, Size(data))]
 }
 
 // IndexOf Search the list for a given value and return position, if not found returns -1

@@ -33,8 +33,8 @@ func TestMapMap(t *testing.T) {
 	r1 := l1.Map(double)
 
 	for _, v := range l1.ToSlice() {
-		assert.Equal(t, double("", v.V2), r1.Get(v.V1).MustGet().V2, "they should be equal")
-		assert.Equal(t, double("", v.V2), r1.GetOrElse(v.V1, -1), "they should be equal")
+		assert.Equal(t, double("", v.V2), r1.Get(v.V1).MustGet().V2, "these should be equal")
+		assert.Equal(t, double("", v.V2), r1.GetOrElse(v.V1, -1), "these should be equal")
 	}
 }
 
@@ -49,7 +49,7 @@ func TestMapRemove(t *testing.T) {
 	l1 := NewStrTestMap(5)
 	l2 := l1.Remove(l1.Keys().Head().MustGet())
 
-	assert.NotEqual(t, l1.ToSlice(), l2.ToSlice(), "they should not be equal")
+	assert.NotEqual(t, l1.ToSlice(), l2.ToSlice(), "these should not be equal")
 	assert.Equal(t, l1.Size()-1, l2.Size(), "map size should decrease")
 
 	for k, _ := range l1.ToMap() {
@@ -66,7 +66,7 @@ func TestMapCompare(t *testing.T) {
 	assert.True(t, l1.Contains(v1), "seq must contain a value")
 
 	i1 := l1.Find(func(i string, v string) bool { return v == v1 }).OrEmpty()
-	assert.Equal(t, v1, i1.V2, "they should be equal")
+	assert.Equal(t, v1, i1.V2, "these should be equal")
 
 	e1 := NewSequence[string]().Find(func(v string) bool { return v == "empty" })
 	assert.Empty(t, e1.OrEmpty())
@@ -88,7 +88,26 @@ func TestMapFilter(t *testing.T) {
 	l2Size := l1.Size() - 4
 	l2 := l1.Filter(func(i string, v int) bool { return v < l2Size })
 
-	assert.Equal(t, l2Size, l2.Size(), "they should be equal")
+	assert.Equal(t, l2Size, l2.Size(), "these should be equal")
+}
+
+func TestMapFilterNot(t *testing.T) {
+	l1 := NewIntTestMap(5)
+	l2Size := l1.Size() - 4
+	l2 := l1.FilterNot(func(i string, v int) bool { return v > l2Size })
+
+	assert.Equal(t, l2Size, l2.Size(), "these should be equal")
+}
+
+func TestMapLimit(t *testing.T) {
+	size := 3
+	l1 := NewIntTestMap(5)
+	l2 := l1.Limit(size)
+
+	assert.Equal(t, size, l2.Size(), "limit items in slice")
+
+	l3 := l1.Limit(10000)
+	assert.Equal(t, l1.Size(), l3.Size(), "set limit greater then size of the slice")
 }
 
 func TestMapFolding(t *testing.T) {
@@ -98,7 +117,7 @@ func TestMapFolding(t *testing.T) {
 		func(s HashMap[string, int], k string, v int) HashMap[string, int] { return s.Update(k, v) },
 	)
 
-	assert.ElementsMatch(t, l1.ToSlice(), l2.ToSlice(), "they should be equal")
+	assert.ElementsMatch(t, l1.ToSlice(), l2.ToSlice(), "these should be equal")
 }
 
 func TestMapEmpty(t *testing.T) {

@@ -36,7 +36,7 @@ func TestSortedMapHeadTail(t *testing.T) {
 	// Head / Tail
 	for _, p := range l1.ToSlice() {
 		// assert equality
-		assert.Equal(t, p.V2, l1.Head().MustGet().V2, "they should be equal")
+		assert.Equal(t, p.V2, l1.Head().MustGet().V2, "these should be equal")
 		l1 = l1.Tail()
 	}
 }
@@ -48,8 +48,8 @@ func TestSortedMapSortedMap(t *testing.T) {
 	r1 := l1.Map(double)
 
 	for _, v := range l1.ToSlice() {
-		assert.Equal(t, double("", v.V2), r1.GetOrElse(v.V1, -1), "they should be equal")
-		assert.Equal(t, double("", v.V2), r1.Get(v.V1).MustGet().V2, "they should be equal")
+		assert.Equal(t, double("", v.V2), r1.GetOrElse(v.V1, -1), "these should be equal")
+		assert.Equal(t, double("", v.V2), r1.Get(v.V1).MustGet().V2, "these should be equal")
 	}
 }
 
@@ -57,15 +57,15 @@ func TestSortedMapUnique(t *testing.T) {
 	l1 := NewIntTestSortedMap(5)
 	l2 := l1.Join(NewIntTestSortedMap(3))
 
-	assert.Equal(t, l1.ToMap(), l2.ToMap(), "they should be equal")
+	assert.Equal(t, l1.ToMap(), l2.ToMap(), "these should be equal")
 }
 
 func TestSortedMapRemove(t *testing.T) {
 	l1 := NewStrTestSortedMap(5)
 	l2 := l1.Remove(l1.Head().MustGet().V1)
 
-	assert.NotEqual(t, l1.ToSlice(), l2.ToSlice(), "they should be equal")
-	assert.Equal(t, l1.Tail().ToSlice(), l2.ToSlice(), "they should be equal")
+	assert.NotEqual(t, l1.ToSlice(), l2.ToSlice(), "these should be equal")
+	assert.Equal(t, l1.Tail().ToSlice(), l2.ToSlice(), "these should be equal")
 
 	for k, _ := range l1.ToMap() {
 		l2 = l2.Remove(k)
@@ -81,7 +81,7 @@ func TestSortedMapCompare(t *testing.T) {
 	assert.True(t, l1.Contains(v1), "seq must contain a value")
 
 	i1 := l1.Find(func(i string, v string) bool { return v == v1 }).OrEmpty()
-	assert.Equal(t, v1, i1.V2, "they should be equal")
+	assert.Equal(t, v1, i1.V2, "these should be equal")
 
 	e1 := NewSequence[string]().Find(func(v string) bool { return v == "empty" })
 	assert.Empty(t, e1.OrEmpty())
@@ -103,7 +103,26 @@ func TestSortedMapFilter(t *testing.T) {
 	l2Size := l1.Size() - 4
 	l2 := l1.Filter(func(i string, v int) bool { return v < l2Size })
 
-	assert.Equal(t, l2Size, l2.Size(), "they should be equal")
+	assert.Equal(t, l2Size, l2.Size(), "these should be equal")
+}
+
+func TestSortedMapFilterNot(t *testing.T) {
+	l1 := NewIntTestSortedMap(5)
+	l2Size := l1.Size() - 4
+	l2 := l1.FilterNot(func(i string, v int) bool { return v > l2Size })
+
+	assert.Equal(t, l2Size, l2.Size(), "these should be equal")
+}
+
+func TestSortedMapLimit(t *testing.T) {
+	size := 3
+	l1 := NewIntTestSortedMap(5)
+	l2 := l1.Limit(size)
+
+	assert.Equal(t, size, l2.Size(), "limit items in slice")
+
+	l3 := l1.Limit(10000)
+	assert.Equal(t, l1.Size(), l3.Size(), "set limit greater then size of the slice")
 }
 
 func TestSortedMapFolding(t *testing.T) {
@@ -113,7 +132,7 @@ func TestSortedMapFolding(t *testing.T) {
 		func(s SortedMap[string, int], k string, v int) SortedMap[string, int] { return s.Update(k, v) },
 	)
 
-	assert.Equal(t, l1.Reversed().ToSlice(), l2.ToSlice(), "they should be equal")
+	assert.Equal(t, l1.Reversed().ToSlice(), l2.ToSlice(), "these should be equal")
 }
 
 func TestSortedMapEmpty(t *testing.T) {
@@ -130,24 +149,24 @@ func TestSortedMapEmpty(t *testing.T) {
 func TestSortedMapReversed(t *testing.T) {
 	l1 := NewStrTestSortedMap(5)
 	for _, p := range l1.Reversed().Reversed().ToSlice() {
-		assert.Equal(t, l1.Head().MustGet().V1, p.V1, "they should be equal")
+		assert.Equal(t, l1.Head().MustGet().V1, p.V1, "these should be equal")
 		l1 = l1.Tail()
 	}
 }
 
 func TestSortedMapSort(t *testing.T) {
 	l1 := NewStrTestSortedMap(4)
-	assert.Equal(t, l1.Values().ToSlice(), l1.Reversed().Sort(helper.StrSort).Values().ToSlice(), "they should be equal")
+	assert.Equal(t, l1.Values().ToSlice(), l1.Reversed().Sort(helper.StrSort).Values().ToSlice(), "these should be equal")
 }
 
 func TestSortedMapSortByKey(t *testing.T) {
 	l1 := NewStrTestSortedMap(10)
-	assert.Equal(t, l1.ToSlice(), l1.Reversed().SortByKey(helper.StrSort).ToSlice(), "they should be equal")
+	assert.Equal(t, l1.ToSlice(), l1.Reversed().SortByKey(helper.StrSort).ToSlice(), "these should be equal")
 }
 
 func TestSortedMapKeys(t *testing.T) {
 	l1 := NewStrTestSortedMap(10)
-	assert.Equal(t, l1.Keys().ToSlice(), l1.Reversed().SortByKey(helper.StrSort).Keys().ToSlice(), "they should be equal")
+	assert.Equal(t, l1.Keys().ToSlice(), l1.Reversed().SortByKey(helper.StrSort).Keys().ToSlice(), "these should be equal")
 }
 
 func TestSortedMapRace(t *testing.T) {
@@ -184,5 +203,5 @@ func TestSortedMapRace(t *testing.T) {
 	l2 = update(l2, 1)
 	l2 = update(l2, 2)
 
-	assert.Equal(t, l2.ToSlice(), l1.Sort(helper.IntSort).ToSlice(), "they should be equal")
+	assert.Equal(t, l2.ToSlice(), l1.Sort(helper.IntSort).ToSlice(), "these should be equal")
 }

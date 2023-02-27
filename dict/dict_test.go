@@ -38,8 +38,8 @@ func TestMapMap(t *testing.T) {
 	r1 := Map(l1, double)
 
 	for k, v := range l1 {
-		assert.Equal(t, double("", v), r1[k], "they should be equal")
-		assert.Equal(t, double("", v), GetOrElse(r1, k, -1), "they should be equal")
+		assert.Equal(t, double("", v), r1[k], "these should be equal")
+		assert.Equal(t, double("", v), GetOrElse(r1, k, -1), "these should be equal")
 	}
 }
 
@@ -47,7 +47,7 @@ func TestMapRemove(t *testing.T) {
 	l1 := NewStrTestMap(5)
 	l2 := Remove(l1, slice.Head(Keys(l1)).OrEmpty())
 
-	assert.NotEqual(t, l1, l2, "they should not be equal")
+	assert.NotEqual(t, l1, l2, "these should not be equal")
 	assert.Equal(t, Size(l1)-1, Size(l2), "map size should decrease")
 
 	for k, _ := range l1 {
@@ -71,7 +71,7 @@ func TestMapCompare(t *testing.T) {
 	assert.True(t, Contains(l1, v1), "seq must contain a value")
 
 	i1 := Find(l1, func(i, v string) bool { return v == v1 }).OrEmpty()
-	assert.Equal(t, v1, i1.V2, "they should be equal")
+	assert.Equal(t, v1, i1.V2, "these should be equal")
 
 	s1 := Fold(
 		l1,
@@ -91,7 +91,26 @@ func TestMapFilter(t *testing.T) {
 	l2Size := Size(l1) - 4
 	l2 := Filter(l1, func(i string, v int) bool { return v < l2Size })
 
-	assert.Equal(t, l2Size, Size(l2), "they should be equal")
+	assert.Equal(t, l2Size, Size(l2), "these should be equal")
+}
+
+func TestMapFilterNot(t *testing.T) {
+	l1 := NewIntTestMap(5)
+	l2Size := Size(l1) - 4
+	l2 := FilterNot(l1, func(i string, v int) bool { return v > l2Size })
+
+	assert.Equal(t, l2Size, Size(l2), "these should be equal")
+}
+
+func TestMapLimit(t *testing.T) {
+	size := 3
+	l1 := NewIntTestMap(5)
+	l2 := Limit(l1, size)
+
+	assert.Equal(t, size, Size(l2), "limit items in slice")
+
+	l3 := Limit(l1, 10000)
+	assert.Equal(t, Size(l1), Size(l3), "set limit greater then size of the slice")
 }
 
 func TestMapFolding(t *testing.T) {
@@ -105,7 +124,7 @@ func TestMapFolding(t *testing.T) {
 		},
 	)
 
-	assert.Equal(t, l1, l2, "they should be equal")
+	assert.Equal(t, l1, l2, "these should be equal")
 }
 
 func TestMapEmpty(t *testing.T) {

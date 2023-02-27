@@ -14,15 +14,15 @@ import (
 // SortedMap is a container for an optional Values of type V. If Values exists, HashMap is
 // of type Some. If the Values is absent, HashMap is of type None.
 type SortedMap[K comparable, V any] struct {
-	index map[K]int
-	pairs []tuple.T2[K, V]
+	index  map[K]int
+	sorted []tuple.T2[K, V]
 }
 
 // NewSortedMap Builds a HashMap
 func NewSortedMap[K comparable, V any]() SortedMap[K, V] {
 	mapVal := SortedMap[K, V]{
-		pairs: []tuple.T2[K, V]{},
-		index: map[K]int{},
+		sorted: []tuple.T2[K, V]{},
+		index:  map[K]int{},
 	}
 
 	return mapVal
@@ -35,8 +35,8 @@ func ToSortedMap[K comparable, V any](data map[K]V) SortedMap[K, V] {
 	}
 
 	return SortedMap[K, V]{
-		index: buildIndexFromPairs(pairs),
-		pairs: pairs,
+		index:  buildIndexFromPairs(pairs),
+		sorted: pairs,
 	}
 }
 
@@ -48,8 +48,8 @@ func (o SortedMap[K, V]) SetKeys(keys ...K) SortedMap[K, V] {
 	}
 
 	mapVal := SortedMap[K, V]{
-		pairs: pairs,
-		index: buildIndexFromPairs(pairs),
+		sorted: pairs,
+		index:  buildIndexFromPairs(pairs),
 	}
 
 	return mapVal
@@ -58,13 +58,13 @@ func (o SortedMap[K, V]) SetKeys(keys ...K) SortedMap[K, V] {
 func (o SortedMap[K, V]) SetValues(values ...V) SortedMap[K, V] {
 	var empty V
 	pairs := []tuple.T2[K, V]{}
-	for i, v := range o.pairs {
+	for i, v := range o.sorted {
 		pairs = append(pairs, tuple.New2(v.V1, slice.GetOrElse(values, i, empty)))
 	}
 
 	mapVal := SortedMap[K, V]{
-		pairs: pairs,
-		index: buildIndexFromPairs(pairs),
+		sorted: pairs,
+		index:  buildIndexFromPairs(pairs),
 	}
 
 	return mapVal
@@ -72,8 +72,8 @@ func (o SortedMap[K, V]) SetValues(values ...V) SortedMap[K, V] {
 
 func newSortedMapWithList[K comparable, V any](values []tuple.T2[K, V]) SortedMap[K, V] {
 	rez := SortedMap[K, V]{
-		pairs: values,
-		index: buildIndexFromPairs(values),
+		sorted: values,
+		index:  buildIndexFromPairs(values),
 	}
 
 	return rez
@@ -82,25 +82,25 @@ func newSortedMapWithList[K comparable, V any](values []tuple.T2[K, V]) SortedMa
 func (o SortedMap[K, V]) GobEncode() ([]byte, error) {
 	store := bytes.NewBuffer([]byte{})
 	encoder := gob.NewEncoder(store)
-	err := encoder.Encode(o.pairs)
+	err := encoder.Encode(o.sorted)
 
 	return store.Bytes(), err
 }
 
 func (o *SortedMap[K, V]) GobDecode(data []byte) error {
-	o.pairs = []tuple.T2[K, V]{}
-	err := gob.NewDecoder(bytes.NewBuffer(data)).Decode(&o.pairs)
-	o.index = buildIndexFromPairs(o.pairs)
+	o.sorted = []tuple.T2[K, V]{}
+	err := gob.NewDecoder(bytes.NewBuffer(data)).Decode(&o.sorted)
+	o.index = buildIndexFromPairs(o.sorted)
 
 	return err
 }
 
 func (o SortedMap[K, V]) Get(k K) mo.Option[tuple.T2[K, V]] {
-	return slice.Get(o.pairs, dict.GetOrElse(o.index, k, -1))
+	return slice.Get(o.sorted, dict.GetOrElse(o.index, k, -1))
 }
 
 func (o SortedMap[K, V]) GetOrElse(k K, def V) V {
-	pair := slice.Get(o.pairs, dict.GetOrElse(o.index, k, -1))
+	pair := slice.Get(o.sorted, dict.GetOrElse(o.index, k, -1))
 	if pair.IsPresent() {
 		return pair.MustGet().V2
 	}
@@ -109,15 +109,15 @@ func (o SortedMap[K, V]) GetOrElse(k K, def V) V {
 }
 
 func (o SortedMap[K, V]) Head() mo.Option[tuple.T2[K, V]] {
-	return slice.Head(o.pairs)
+	return slice.Head(o.sorted)
 }
 
 func (o SortedMap[K, V]) Tail() SortedMap[K, V] {
-	return newSortedMapWithList(slice.Tail(o.pairs))
+	return newSortedMapWithList(slice.Tail(o.sorted))
 }
 
 func (o SortedMap[K, V]) Join(m SortedMap[K, V]) SortedMap[K, V] {
-	rez := append(o.pairs, m.ToSequence().ToSlice()...)
+	rez := append(o.sorted, m.ToSequence().ToSlice()...)
 	return newSortedMapWithList(slice.UniqueAny(rez))
 }
 
@@ -130,7 +130,7 @@ func (o SortedMap[K, V]) indexOf(key K) (int, bool) {
 }
 
 func (o SortedMap[K, V]) Update(key K, value V) SortedMap[K, V] {
-	lst := slice.Copy(o.pairs)
+	lst := slice.Copy(o.sorted)
 	if idx, ok := o.indexOf(key); ok {
 		lst[idx].V2 = value
 	} else {
@@ -146,7 +146,7 @@ func (o SortedMap[K, V]) Remove(key K) SortedMap[K, V] {
 	}
 
 	// remove element
-	lst := slice.Copy(o.pairs)
+	lst := slice.Copy(o.sorted)
 	idx, _ := o.indexOf(key)
 
 	return newSortedMapWithList(append(lst[0:idx], lst[idx+1:]...))
@@ -158,7 +158,7 @@ func (o SortedMap[K, V]) Contains(s V) bool {
 }
 
 func (o SortedMap[K, V]) Find(f func(K, V) bool) mo.Option[tuple.T2[K, V]] {
-	for _, p := range o.pairs {
+	for _, p := range o.sorted {
 		if f(p.V1, p.V2) {
 			return mo.Some(p)
 		}
@@ -174,7 +174,13 @@ func (o SortedMap[K, V]) ContainsKey(k K) bool {
 
 // Size returns 1 when Values is present or 0 instead.
 func (o SortedMap[K, V]) Size() int {
-	return len(o.pairs)
+	return len(o.sorted)
+}
+
+// Limit returns first N elements.
+func (o SortedMap[K, V]) Limit(c int) SortedMap[K, V] {
+	rez := slice.Limit(o.sorted, c)
+	return newSortedMapWithList(rez)
 }
 
 func (o SortedMap[K, V]) IsEmpty() bool {
@@ -183,7 +189,7 @@ func (o SortedMap[K, V]) IsEmpty() bool {
 
 func (o SortedMap[K, V]) Keys() Sequence[K] {
 	keys := []K{}
-	for _, p := range o.pairs {
+	for _, p := range o.sorted {
 		keys = append(keys, p.V1)
 	}
 
@@ -192,7 +198,7 @@ func (o SortedMap[K, V]) Keys() Sequence[K] {
 
 func (o SortedMap[K, V]) Values() Sequence[V] {
 	values := []V{}
-	for _, p := range o.pairs {
+	for _, p := range o.sorted {
 		values = append(values, p.V2)
 	}
 
@@ -200,28 +206,33 @@ func (o SortedMap[K, V]) Values() Sequence[V] {
 }
 
 func (o SortedMap[K, V]) Reversed() SortedMap[K, V] {
-	return newSortedMapWithList(slice.Reversed(o.pairs))
+	return newSortedMapWithList(slice.Reversed(o.sorted))
 }
 
 func (o SortedMap[K, V]) Sort(f func(V, V) bool) SortedMap[K, V] {
-	lst := slice.Copy(o.pairs)
+	lst := slice.Copy(o.sorted)
 	sort.Slice(lst, func(p, q int) bool { return f(lst[p].V2, lst[q].V2) })
 	return newSortedMapWithList(lst)
 }
 
 func (o SortedMap[K, V]) SortByKey(f func(K, K) bool) SortedMap[K, V] {
-	lst := slice.Copy(o.pairs)
+	lst := slice.Copy(o.sorted)
 	sort.Slice(lst, func(p, q int) bool { return f(lst[p].V1, lst[q].V1) })
 	return newSortedMapWithList(lst)
 }
 
 func (o SortedMap[K, V]) Filter(f func(K, V) bool) SortedMap[K, V] {
-	rez := slice.Filter(o.pairs, func(p tuple.T2[K, V]) bool { return f(p.V1, p.V2) })
+	rez := slice.Filter(o.sorted, func(p tuple.T2[K, V]) bool { return f(p.V1, p.V2) })
+	return newSortedMapWithList(rez)
+}
+
+func (o SortedMap[K, V]) FilterNot(f func(K, V) bool) SortedMap[K, V] {
+	rez := slice.FilterNot(o.sorted, func(p tuple.T2[K, V]) bool { return f(p.V1, p.V2) })
 	return newSortedMapWithList(rez)
 }
 
 func (o SortedMap[K, V]) FoldLeft(z SortedMap[K, V], f func(SortedMap[K, V], K, V) SortedMap[K, V]) SortedMap[K, V] {
-	for _, p := range o.pairs {
+	for _, p := range o.sorted {
 		z = f(z, p.V1, p.V2)
 	}
 
@@ -235,7 +246,7 @@ func (o SortedMap[K, V]) FoldRight(z SortedMap[K, V], f func(SortedMap[K, V], K,
 // Map executes the mapper function if Values is present or returns None if absent.
 func (o SortedMap[K, V]) Map(f func(K, V) V) SortedMap[K, V] {
 	lst := []tuple.T2[K, V]{}
-	for _, p := range o.pairs {
+	for _, p := range o.sorted {
 		lst = append(lst, tuple.New2(p.V1, f(p.V1, p.V2)))
 	}
 
@@ -244,7 +255,7 @@ func (o SortedMap[K, V]) Map(f func(K, V) V) SortedMap[K, V] {
 
 func (o SortedMap[K, V]) ToMap() map[K]V {
 	rez := map[K]V{}
-	for _, p := range o.pairs {
+	for _, p := range o.sorted {
 		rez[p.V1] = p.V2
 	}
 
@@ -252,7 +263,7 @@ func (o SortedMap[K, V]) ToMap() map[K]V {
 }
 
 func (o SortedMap[K, V]) ToSlice() []tuple.T2[K, V] {
-	return slice.Copy(o.pairs)
+	return slice.Copy(o.sorted)
 }
 
 func (o SortedMap[K, V]) ToSequence() Sequence[tuple.T2[K, V]] {

@@ -60,6 +60,10 @@ func (o Sequence[V]) Filter(p func(V) bool) Sequence[V] {
 	return NewSequence(slice.Filter(o.items, p)...)
 }
 
+func (o Sequence[V]) FilterNot(p func(V) bool) Sequence[V] {
+	return NewSequence(slice.FilterNot(o.items, p)...)
+}
+
 func (o Sequence[V]) FilterWithIndex(p func(int, V) bool) Sequence[V] {
 	return NewSequence(slice.FilterWithIndex(o.items, p)...)
 }
@@ -77,12 +81,16 @@ func (o Sequence[V]) Size() int {
 	return slice.Size(o.items)
 }
 
-// IndexOf Search the pairs for a given value and return position, if not found returns -1
+func (o Sequence[V]) Limit(c int) Sequence[V] {
+	return NewSequence(slice.Limit(o.items, c)...)
+}
+
+// IndexOf Search the sorted for a given value and return position, if not found returns -1
 func (o Sequence[V]) IndexOf(e V) (int, bool) {
 	return slice.IndexOfAny(o.items, e)
 }
 
-// Contains Tests whether this pairs contains a given items as an element.
+// Contains Tests whether this sorted contains a given items as an element.
 func (o Sequence[V]) Contains(e V) bool {
 	return slice.ContainsAny(o.items, e)
 }

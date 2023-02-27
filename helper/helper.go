@@ -1,6 +1,9 @@
 package helper
 
-import "reflect"
+import (
+	"golang.org/x/exp/constraints"
+	"reflect"
+)
 
 func Range(s, e int) (rez []int) {
 	for ; s < e; s++ {
@@ -28,4 +31,11 @@ func CompareAny[T any](t1 T, t2 T) bool {
 	}
 
 	return reflect.DeepEqual(t1, t2)
+}
+
+func Min[T constraints.Ordered](a, b T) T {
+	if a < b {
+		return a
+	}
+	return b
 }

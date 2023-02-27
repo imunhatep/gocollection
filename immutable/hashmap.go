@@ -78,6 +78,11 @@ func (o HashMap[K, V]) Size() int {
 	return dict.Size(o.items)
 }
 
+// Limit returns first N elements.
+func (o HashMap[K, V]) Limit(c int) HashMap[K, V] {
+	return ToMap(dict.Limit(o.items, c))
+}
+
 func (o HashMap[K, V]) IsEmpty() bool {
 	return dict.IsEmpty(o.items)
 }
@@ -100,6 +105,10 @@ func (o HashMap[K, V]) SortByKey(f func(K, K) bool) SortedMap[K, V] {
 
 func (o HashMap[K, V]) Filter(f func(K, V) bool) HashMap[K, V] {
 	return ToMap(dict.Filter(o.items, f))
+}
+
+func (o HashMap[K, V]) FilterNot(f func(K, V) bool) HashMap[K, V] {
+	return ToMap(dict.FilterNot(o.items, f))
 }
 
 func (o HashMap[K, V]) FoldLeft(z HashMap[K, V], f func(HashMap[K, V], K, V) HashMap[K, V]) HashMap[K, V] {

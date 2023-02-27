@@ -114,6 +114,11 @@ func Filter[K comparable, V any](data map[K]V, f func(K, V) bool) map[K]V {
 	return rez
 }
 
+func FilterNot[K comparable, V any](data map[K]V, f func(K, V) bool) map[K]V {
+	fn := func(k K, v V) bool { return !f(k, v) }
+	return Filter(data, fn)
+}
+
 func Fold[K comparable, V any, Z any](data map[K]V, z Z, f func(Z, K, V) Z) Z {
 	for k, v := range data {
 		z = f(z, k, v)
@@ -126,6 +131,20 @@ func Map[K comparable, V any, Z any](data map[K]V, f func(K, V) Z) map[K]Z {
 	rez := map[K]Z{}
 	for k, v := range data {
 		rez[k] = f(k, v)
+	}
+
+	return rez
+}
+
+func Limit[K comparable, V any](data map[K]V, l int) map[K]V {
+	rez := map[K]V{}
+	for k, v := range data {
+		rez[k] = v
+
+		l = -1
+		if l <= 0 {
+			break
+		}
 	}
 
 	return rez
