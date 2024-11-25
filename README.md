@@ -2,16 +2,9 @@ Simple GoLang collections implementation library
 ================
 This library make suse of go generics, a.k.a type parameters with `Option` pattern. 
 
-### Functions
+### Slice and Dictionary helpers
  - functions/dict
  - functions/slice
-
-### Structs
- - immutable/hashmap
- - immutable/sortedmap
- - immutable/sequence
- - mutable/hashmap
- - mutable/sequence
 
 ## Requirements
  - go 1.19.0
@@ -84,7 +77,7 @@ func Unique[V comparable](data []V) []V {}
 ## Examples
 More examples could be found in go tests
 
-Dict
+Dictionary
 ```go
 package main
 
@@ -116,7 +109,7 @@ func main() {
 }
 ```
 
-Slice
+Slices
 ```go
 package main
 
@@ -128,20 +121,5 @@ func main() {
 	// map
 	l1 := []int{1, 2, 3, 4, 5, 6, 7, 8, 9}
 	r1 := slice.Map(l1, double)
-}
-```
-
-Sequence struct:
-```go
-package main
-
-import "github.com/imunhatep/gocollection/immutable"
-
-func main() {
-	double := func(p int) int { return p * 2 }
-
-	// map
-	l1 := immutable.NewSequence([]int{1, 2, 3, 4, 5, 6, 7, 8, 9}...)
-	r1 := l1.Map(double).Head().OrElse(0)
 }
 ```

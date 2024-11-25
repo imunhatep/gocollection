@@ -18,13 +18,10 @@ go.sum
 vendor/
 **/manifests
 
-# helm
-charts/aws-reporting/Chart.lock
-charts/aws-reporting/charts/*
-
 # ide
 .fleet/
 .idea
+.vscode
 *.iml
 bin/
 tmp/
